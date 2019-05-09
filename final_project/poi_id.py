@@ -4,12 +4,19 @@ import sys
 import pickle
 sys.path.append("../tools/")
 
+import pandas as pd
 from feature_format import featureFormat, targetFeatureSplit
 from tester import dump_classifier_and_data
 
 # Task 1: Select what features you'll use.
 # features_list is a list of strings, each of which is a feature name.
 # The first feature must be "poi".
+
+# By using ExtraTreesClassifier from sklearn we identified 3 features that were
+# not contributing much for the model: 
+#                   loan_advances, director_fees, restricted_stock_deferred
+# So we decided to remove these features from the analysis. 
+
 features_list = ['deferred_income',
                  'expenses',
                  'exercised_stock_options',
@@ -25,14 +32,36 @@ features_list = ['deferred_income',
                  'total_payments',
                  'from_messages',
                  'to_messages',
-                 'deferral_payments']  # You will need to use more features
+                 'deferral_payments',
+                 'poi']  
 
 # Load the dictionary containing the dataset
 with open("final_project_dataset.pkl", "rb") as data_file:
     data_dict = pickle.load(data_file)
 
 # Task 2: Remove outliers
+# Generate Dataframe out of the data_dict
+df_enron = pd.DataFrame.from_dict(data_dict, orient='index')
 
+
+# Define columns of features  
+#df_enron.drop('email_address', axis=1, inplace=True)
+df_enron = df_enron[features_list]
+
+# Change columns type to numeric 
+df_enron = df_enron.apply(pd.to_numeric, errors='coerce')
+
+# Fillna with 0 to replace NaN
+df_enron = df_enron.fillna(0.0)
+print(df_enron)
+
+"""
+
+#
+
+
+# As mentioned on the report, we applied PCA to define outliers and ended 
+# finding one sample called "TOTAL" as a candidate outlier
 
 # Task 3: Create new feature(s)
 # Store to my_dataset for easy export below.
@@ -70,3 +99,4 @@ features_train, features_test, labels_train, labels_test = \
 # generates the necessary .pkl files for validating your results.
 
 dump_classifier_and_data(clf, my_dataset, features_list)
+"""
