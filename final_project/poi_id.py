@@ -53,6 +53,8 @@ df_enron = df_enron.apply(pd.to_numeric, errors='coerce')
 
 # Fillna with 0 to replace NaN
 df_enron = df_enron.fillna(0.0)
+
+# 
 print(df_enron)
 
 """
