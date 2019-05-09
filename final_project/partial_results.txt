@@ -1,0 +1,14 @@
+# LogisticRegression(default), fillna(0), MinMaxScaler, SMOTE, shuffle, test_size=0
+
+0.7128737336298492
+              precision    recall  f1-score   support
+
+       False       0.72      0.75      0.73        71
+        True       0.67      0.63      0.65        57
+
+   micro avg       0.70      0.70      0.70       128
+   macro avg       0.69      0.69      0.69       128
+weighted avg       0.69      0.70      0.69       128
+
+[[53 18]
+ [21 36]]
