@@ -1,0 +1,16 @@
+## Bibliografia
+### Resampling
+* https://www.kaggle.com/rafjaa/resampling-strategies-for-imbalanced-datasets
+* https://elitedatascience.com/imbalanced-classes
+* Detecção de Outliers https://towardsdatascience.com/ways-to-detect-and-remove-the-outliers-404d16608dba
+* Feature Selection https://machinelearningmastery.com/feature-selection-in-python-with-scikit-learn/
+* https://machinelearningmastery.com/feature-selection-machine-learning-python/
+* https://towardsdatascience.com/feature-selection-techniques-in-machine-learning-with-python-f24e7da3f36e
+### Fraud Detection
+https://www.datacamp.com/courses/fraud-detection-in-python
+
+### Precision-Recall Curve
+* https://machinelearningmastery.com/roc-curves-and-precision-recall-curves-for-classification-in-python/
+
+## Outliers
+https://mikulskibartosz.name/outlier-detection-with-scikit-learn-d9246b33d352
