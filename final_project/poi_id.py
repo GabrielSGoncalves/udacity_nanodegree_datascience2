@@ -19,7 +19,8 @@ from tester import dump_classifier_and_data
 # So we decided to remove these features from the analysis.
 np.random.seed(1234)
 
-features_list = ['deferred_income',
+features_list = ['poi',
+                 'deferred_income',
                  'expenses',
                  'exercised_stock_options',
                  'restricted_stock',
@@ -34,8 +35,7 @@ features_list = ['deferred_income',
                  'total_payments',
                  'from_messages',
                  'to_messages',
-                 'deferral_payments',
-                 'poi']
+                 'deferral_payments']
 
 # Load the dictionary containing the dataset
 with open("final_project_dataset.pkl", "rb") as data_file:
@@ -59,33 +59,14 @@ df_enron = df_enron.fillna(0.0)
 # Rescaling feature values with MinMaxScaler
 from sklearn.preprocessing import MinMaxScaler
 scaler = MinMaxScaler()
-X = scaler.fit_transform(df_enron.drop('poi', axis=1))
+X = pd.DataFrame(scaler.fit_transform(df_enron.drop('poi', axis=1)),
+                 index=df_enron.index)
 y = df_enron.poi
 
-# Define X and y
-# X = df_enron.drop('poi', axis=1).values
-# y = df_enron['poi'].values
-
-# Using DBSCAN to spot outliers
-from sklearn.cluster import DBSCAN
-outlier_detection = DBSCAN(
-    eps=0.5,
-    metric="euclidean",
-    min_samples=3,
-    n_jobs=-1)
-clusters = outlier_detection.fit_predict(X)
-df_dbscan = pd.DataFrame(clusters, index=df_enron.index)
-#print(df_dbscan[df_dbscan[0] == -1].index)
-
-list_dbscan_outliers = list(df_dbscan[df_dbscan[0] == -1].index)
-print(list_dbscan_outliers)
-
-# As mentioned on the report, we applied PCA to define outliers and ended
-# finding one sample called "TOTAL" as a candidate outlier
+# As mentioned on the report, we applied PCA to define outliers
 from sklearn.decomposition import PCA
 pca = PCA(n_components=2, random_state=42)
 dim_red = pca.fit_transform(X)
-# print(pca.singular_values_)
 
 # Transform PCA results into Dataframe
 pca_df = pd.DataFrame(dim_red, columns=[
@@ -103,24 +84,12 @@ pca_df['PCA2_zscore'] = (pca_df.PCA2 - pca_df.PCA2.mean()) / pca_df.PCA2.std()
 list_outliers_pca = (pca_df[(np.abs(pca_df.PCA1_zscore) > 3)
                             | (np.abs(pca_df.PCA2_zscore) > 3)]).index
 
-# print(list_outliers_pca)
 
-"""
-from sklearn.preprocessing import MinMaxScaler
-scaler = MinMaxScaler()
-df_features_no_outliers = df_enron.drop(list_outliers_pca)
-X = scaler.fit_transform(df_features_no_outliers.drop('poi', axis=1))
-y = df_features_no_outliers.poi
-"""
+# Remove outliers
+X = X.drop(list_outliers_pca, axis=0)
+y = y.drop(list_outliers_pca, axis=0)
 
-# Spliting data into trainning and testing
-from sklearn.model_selection import train_test_split
-# Split your data X and y, into a training and a test set and fit the
-# pipeline onto the training data
-# X_train, X_test, y_train, y_test = train_test_split(None
-#    X_resampled,  y_resampled, test_size=0.3,
-#    random_state=0)
-
+# Generate synthetic samples POI class
 from imblearn.over_sampling import SMOTE
 # Define the resampling method
 method = SMOTE(kind='regular', random_state=42)
@@ -128,7 +97,7 @@ method = SMOTE(kind='regular', random_state=42)
 # Create the resampled feature set
 X_resampled, y_resampled = method.fit_sample(X, y)
 
-
+# Suffle the samples to avoid bias when tranning data
 from sklearn.utils import shuffle
 X_resampled,  y_resampled = shuffle(X_resampled,  y_resampled)
 
@@ -137,13 +106,15 @@ X_resampled,  y_resampled = shuffle(X_resampled,  y_resampled)
 # pipeline onto the training data
 from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(
-    X_resampled,  y_resampled, test_size=0.5, random_state=0)
+    X_resampled,  y_resampled, test_size=0.3, random_state=0)
 
-
-# print(df_enron)
 # Task 3: Create new feature(s)
 # Store to my_dataset for easy export below.
-my_dataset = data_dict
+my_dataset = pd.concat([pd.DataFrame(y_resampled),
+                        pd.DataFrame(X_resampled)], axis=1)
+my_dataset.columns = features_list
+my_dataset.set_index = X.index
+my_dataset = my_dataset.to_dict('index')
 
 # Extract features and labels from dataset for local testing
 data = featureFormat(my_dataset, features_list, sort_keys=True)
@@ -160,13 +131,13 @@ from sklearn.naive_bayes import GaussianNB
 clf = GaussianNB()
 
 from sklearn.ensemble import RandomForestClassifier
-clf = RandomForestClassifier(bootstrap=True, class_weight=None, criterion='gini',
-                             max_depth=None, max_features='auto', max_leaf_nodes=None,
-                             min_impurity_decrease=0.0, min_impurity_split=None,
-                             min_samples_leaf=1, min_samples_split=2,
-                             min_weight_fraction_leaf=0.0, n_estimators='warn', n_jobs=None,
-                             oob_score=False, random_state=42, verbose=0,
-                             warm_start=False)
+clf = RandomForestClassifier(bootstrap=True, class_weight={0: 1, 1: 6},
+                             criterion='gini', max_depth=80, max_features=2,
+                             max_leaf_nodes=None, min_impurity_decrease=0.0,
+                             min_impurity_split=None, min_samples_leaf=4,
+                             min_samples_split=8, min_weight_fraction_leaf=0.0,
+                             n_estimators=100, n_jobs=None, oob_score=False,
+                             random_state=42, verbose=0, warm_start=False)
 print(clf)
 clf.fit(X_train, y_train)
 predicted = clf.predict(X_test)
