@@ -131,13 +131,13 @@ from sklearn.naive_bayes import GaussianNB
 clf = GaussianNB()
 
 from sklearn.ensemble import RandomForestClassifier
-clf = RandomForestClassifier(bootstrap=True, class_weight={0: 1, 1: 6},
-                             criterion='gini', max_depth=80, max_features=2,
-                             max_leaf_nodes=None, min_impurity_decrease=0.0,
-                             min_impurity_split=None, min_samples_leaf=4,
-                             min_samples_split=8, min_weight_fraction_leaf=0.0,
-                             n_estimators=100, n_jobs=None, oob_score=False,
-                             random_state=42, verbose=0, warm_start=False)
+clf = RandomForestClassifier(bootstrap=True, class_weight='balanced_subsample',
+            criterion='gini', max_depth=100, max_features=6,
+            max_leaf_nodes=None, min_impurity_decrease=0.0,
+            min_impurity_split=None, min_samples_leaf=2,
+            min_samples_split=10, min_weight_fraction_leaf=0.0,
+            n_estimators=100, n_jobs=None, oob_score=False,
+            random_state=None, verbose=0, warm_start=False)
 print(clf)
 clf.fit(X_train, y_train)
 predicted = clf.predict(X_test)
@@ -145,7 +145,7 @@ probs = clf.predict_proba(X_test)
 
 # Print the ROC curve, classification report and confusion matrix
 from sklearn.metrics import confusion_matrix, classification_report
-from sklearn.metrics import roc_auc_score, recall_score
+from sklearn.metrics import roc_auc_score, recall_score, precision_score, f1_score
 print(roc_auc_score(y_test, probs[:, 1]))
 print(classification_report(y_test, predicted))
 print(confusion_matrix(y_test, predicted))
@@ -159,27 +159,31 @@ print(confusion_matrix(y_test, predicted))
 # http://scikit-learn.org/stable/modules/generated/sklearn.cross_validation.StratifiedShuffleSplit.html
 
 from sklearn.model_selection import StratifiedShuffleSplit
-sss = StratifiedShuffleSplit(n_splits=5, test_size=0.3, random_state=42)
+sss = StratifiedShuffleSplit(n_splits=10, test_size=0.3, random_state=42)
 sss.get_n_splits(X_resampled, y_resampled)
 
 recall_score_list = []
+precision_score_list = []
+f1_score_list = []
 
 for train_index, test_index in sss.split(X_resampled, y_resampled):
     X_train, X_test = X_resampled[train_index], X_resampled[test_index]
     y_train, y_test = y_resampled[train_index], y_resampled[test_index]
-    # print(clf)
     clf.fit(X_train, y_train)
     predicted = clf.predict(X_test)
     probs = clf.predict_proba(X_test)
 
     # Print the ROC curve, classification report and confusion matrix
-    from sklearn.metrics import confusion_matrix, classification_report, roc_auc_score
     print(roc_auc_score(y_test, probs[:, 1]))
     print(classification_report(y_test, predicted))
     print(confusion_matrix(y_test, predicted))
     recall_score_list.append(recall_score(y_test, predicted))
+    precision_score_list.append(precision_score(y_test, predicted))
+    f1_score_list.append(f1_score(y_test, predicted))
 
 print('Recall Score Mean: {}'.format(np.mean(recall_score_list)))
+print('Precision Score Mean: {}'.format(np.mean(precision_score_list)))
+print('F1 Score Mean: {}'.format(np.mean(f1_score_list)))
 
 
 # Task 6: Dump your classifier, dataset, and features_list so anyone can
