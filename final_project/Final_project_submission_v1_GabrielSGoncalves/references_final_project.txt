@@ -1,0 +1,25 @@
+# References
+
+## Outliers detection
+* https://mikulskibartosz.name/outlier-detection-with-scikit-learn-d9246b33d352
+* https://towardsdatascience.com/ways-to-detect-and-remove-the-outliers-404d16608dba
+* https://seaborn.pydata.org/generated/seaborn.scatterplot.html
+
+## Resampling
+* https://imbalanced-learn.readthedocs.io/en/stable/generated/imblearn.over_sampling.SMOTE.html
+* https://www.kaggle.com/rafjaa/resampling-strategies-for-imbalanced-datasets
+* https://elitedatascience.com/imbalanced-classes
+
+## Feature Selection 
+* https://machinelearningmastery.com/feature-selection-in-python-with-scikit-learn/
+* https://machinelearningmastery.com/feature-selection-machine-learning-python/
+* https://towardsdatascience.com/feature-selection-techniques-in-machine-learning-with-python-f24e7da3f36e
+
+### Precision-Recall Curve
+* https://machinelearningmastery.com/roc-curves-and-precision-recall-curves-for-classification-in-python/
+
+### Fraud Detection
+https://www.datacamp.com/courses/fraud-detection-in-python
+
+# I confirm that all the work done in this project was performed by me, Gabriel 
+# dos Santos Gonçalves, using information from the references cited above.
